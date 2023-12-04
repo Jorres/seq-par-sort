@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	"log"
+	// "log"
 	"math/rand"
-	"os"
-	"runtime/pprof"
+	// "os"
+	// "runtime/pprof"
 	"sync"
 	"time"
 )
 
-const arraySize = 1e7
+const arraySize = 1e8
 
 func swap(arr []int, i, j int) {
 	arr[i], arr[j] = arr[j], arr[i]
@@ -32,15 +32,24 @@ func doPartition(arr []int, low, high int) int {
 
 func bubbleSort(arr []int, i, j int) {
 	for end := j + 1; end > i; end-- {
+		swapped := false
 		for current := i; current < end-1; current++ {
 			if arr[current] > arr[current+1] {
 				arr[current], arr[current+1] = arr[current+1], arr[current]
+				swapped = true
 			}
+		}
+		if !swapped {
+			return
 		}
 	}
 }
 
 func qsortSeq(arr []int, low, high int) {
+	if high-low < 20 {
+		bubbleSort(arr, low, high)
+		return
+	}
 	if low < high {
 		pivot := doPartition(arr, low, high)
 		qsortSeq(arr, low, pivot-1)
@@ -49,8 +58,8 @@ func qsortSeq(arr []int, low, high int) {
 }
 
 func qsortPar(arr []int, low, high int) {
-	if high-low < 20 {
-		bubbleSort(arr, low, high)
+	if high-low < 2000 {
+		qsortSeq(arr, low, high)
 		return
 	}
 
@@ -85,7 +94,7 @@ func isSortedAsc(arr []int) bool {
 }
 
 func doTest(sortingFunc func([]int, int, int), testName string) {
-	const nTests = 1
+	const nTests = 5
 	var totalTime time.Duration
 
 	fmt.Printf("%v with %v elements, averaged over %v launches\n\n", testName, arraySize, nTests)
@@ -95,16 +104,18 @@ func doTest(sortingFunc func([]int, int, int), testName string) {
 
 		start := time.Now()
 
-		f, err := os.Create("cpu.prof")
-		if err != nil {
-			log.Fatal("could not create CPU profile: ", err)
-		}
-		defer f.Close() // error handling omitted for example
-		if err := pprof.StartCPUProfile(f); err != nil {
-			log.Fatal("could not start CPU profile: ", err)
-		}
+		// f, err := os.Create("cpu.prof")
+		// if err != nil {
+		// 	log.Fatal("could not create CPU profile: ", err)
+		// }
+		// defer f.Close() // error handling omitted for example
+		// if err := pprof.StartCPUProfile(f); err != nil {
+		// 	log.Fatal("could not start CPU profile: ", err)
+		// }
+
 		sortingFunc(arr, 0, len(arr)-1)
-		pprof.StopCPUProfile()
+
+		// pprof.StopCPUProfile()
 
 		elapsed := time.Since(start)
 		totalTime += elapsed
@@ -122,6 +133,6 @@ func doTest(sortingFunc func([]int, int, int), testName string) {
 }
 
 func main() {
-	// doTest(qsortSeq, "Quicksort sequential")
 	doTest(qsortPar, "Quicksort parallel")
+	// doTest(qsortSeq, "Quicksort sequential")
 }
