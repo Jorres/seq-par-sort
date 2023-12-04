@@ -11,6 +11,8 @@ import (
 )
 
 const arraySize = 1e8
+const stopForkingSize = 2000
+const startBubbleSortSize = 20
 
 func swap(arr []int, i, j int) {
 	arr[i], arr[j] = arr[j], arr[i]
@@ -46,7 +48,7 @@ func bubbleSort(arr []int, i, j int) {
 }
 
 func qsortSeq(arr []int, low, high int) {
-	if high-low < 20 {
+	if high-low < startBubbleSortSize {
 		bubbleSort(arr, low, high)
 		return
 	}
@@ -58,7 +60,7 @@ func qsortSeq(arr []int, low, high int) {
 }
 
 func qsortPar(arr []int, low, high int) {
-	if high-low < 2000 {
+	if high-low < stopForkingSize {
 		qsortSeq(arr, low, high)
 		return
 	}
