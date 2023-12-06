@@ -48,14 +48,15 @@ func TestParMap(t *testing.T) {
 
 func TestParFilter(t *testing.T) {
 	isEven := func(x int) bool {
-		return x % 2 == 0
+		return x%2 == 0
 	}
 	lessThan1 := func(x int) bool {
 		return x < 1
 	}
 
 	tests := []struct {
-		a, want []int; f func (int) bool
+		a, want []int
+		f       func(int) bool
 	}{
 		{[]int{0, 1, 2, 3}, []int{0, 2}, isEven},
 		{[]int{0, 1, 2, 3, 5}, []int{0, 2}, isEven},
@@ -75,7 +76,9 @@ func TestParFilter(t *testing.T) {
 
 func TestParCopy(t *testing.T) {
 	tests := []struct {
-		a []int; l, r int; want []int
+		a    []int
+		l, r int
+		want []int
 	}{
 		{[]int{0, 1, 2, 3}, 0, 4, []int{0, 1, 2, 3}},
 		{[]int{0, 1, 2, 3}, 1, 3, []int{1, 2}},
@@ -84,7 +87,7 @@ func TestParCopy(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		to := make([]int, tt.r - tt.l)
+		to := make([]int, tt.r-tt.l)
 		parCopy(to, tt.a, 0, tt.l, tt.r)
 		if !reflect.DeepEqual(to, tt.want) {
 			t.Errorf("parFilter(%v) = %v; want %v", tt.a, to, tt.want)
@@ -93,17 +96,17 @@ func TestParCopy(t *testing.T) {
 }
 
 func TestParQSort(t *testing.T) {
- // parQSort
+	// parQSort
 	tests := []struct {
 		a, want []int
 	}{
 		{[]int{2, 1, 3, 0}, []int{0, 1, 2, 3}},
 		{[]int{1, 1, 1}, []int{1, 1, 1}},
-		{[]int{100, 10, 123, -1, 0, 0, 0, 0, 0, 1, 1 ,1}, []int{-1, 0, 0, 0, 0, 0, 1, 1, 1, 10, 100, 123}},
+		{[]int{100, 10, 123, -1, 0, 0, 0, 0, 0, 1, 1, 1}, []int{-1, 0, 0, 0, 0, 0, 1, 1, 1, 10, 100, 123}},
 	}
 
 	for _, tt := range tests {
-		parQSort(tt.a, 0, len(tt.a))
+		parQSort(tt.a, 0, len(tt.a)-1)
 		if !reflect.DeepEqual(tt.a, tt.want) {
 			t.Errorf("parQSort(..) = %v; want %v", tt.a, tt.want)
 		}

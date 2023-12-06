@@ -59,24 +59,17 @@ func parScan(a []int, l, r int, f func(int, int) int, startVal int) []int {
 	sums = parScan(sums, 0, len(sums), sum, 0) // span X/blockSize
 	ans := make([]int, r-l)
 
-	var wg2 sync.WaitGroup
-	wg2.Add(blocks)
-	for i := 0; i < blocks; i++ { // span blockSize
-		go func(curBlock int) {
+	parFor(blocks, func(curBlock int) {
+		curBlockVal := 0
+		if curBlock > 0 {
+			curBlockVal = sums[curBlock-1]
+		}
 
-			curBlockVal := 0
-			if curBlock > 0 {
-				curBlockVal = sums[curBlock-1]
-			}
-
-			for k := l + curBlock*scanBlockSize; k < min(l+(curBlock+1)*scanBlockSize, r); k++ {
-				curBlockVal = f(curBlockVal, a[k])
-				ans[k-l] = curBlockVal
-			}
-			wg2.Done()
-		}(i)
-	}
-	wg2.Wait()
+		for k := l + curBlock*scanBlockSize; k < min(l+(curBlock+1)*scanBlockSize, r); k++ {
+			curBlockVal = f(curBlockVal, a[k])
+			ans[k-l] = curBlockVal
+		}
+	})
 
 	return ans
 }
@@ -103,7 +96,7 @@ func parMap(a, b []int, l, r int, f func(int) int) {
 
 func parFilter(a []int, l, r int, f func(int) bool) []int {
 	if r-l < parBlockSize {
-		var ans []int
+		ans := make([]int, parBlockSize / 2)
 		for i := l; i < r; i++ {
 			if f(a[i]) {
 				ans = append(ans, a[i])
@@ -123,45 +116,37 @@ func parFilter(a []int, l, r int, f func(int) bool) []int {
 	blocks := int(math.Ceil(float64(r-l) / parBlockSize))
 	sums := make([]int, blocks)
 
-	var wg1 sync.WaitGroup
-	wg1.Add(blocks)
-	for i := 0; i < blocks; i++ {
-		go func(curBlock int) {
-			// reduceSerial again haha copypaste go brr
-			curBlockVal := 0
-			for k := l + curBlock*parBlockSize; k < min(l+(curBlock+1)*parBlockSize, r); k++ {
-				curBlockVal = curBlockVal + flags[k]
-			}
-			sums[curBlock] = curBlockVal
-			wg1.Done()
-		}(i)
-	}
-	wg1.Wait()
+	parFor(blocks, func(curBlock int) {
+		curBlockVal := 0
+		for k := l + curBlock*parBlockSize; k < min(l+(curBlock+1)*parBlockSize, r); k++ {
+			curBlockVal = curBlockVal + flags[k]
+		}
+		sums[curBlock] = curBlockVal
+	})
 
 	sums = parScan(sums, 0, len(sums), sum, 0)
-	ans := make([]int, sums[len(sums)-1])
 
-	var wg2 sync.WaitGroup
-	wg2.Add(blocks)
-	for i := 0; i < blocks; i++ {
-		go func(curBlock int) {
-			shift := 0
-			if curBlock > 0 {
-				shift = sums[curBlock-1]
-			}
-			lastWritten := shift
-			for k := l + curBlock*parBlockSize; k < min(l+(curBlock+1)*parBlockSize, r); k++ {
-				if flags[k] == 1 {
-					ans[lastWritten] = a[k]
-					lastWritten += 1
+	// I used to do this for a separate answer,
+	// but reusing flags allocation makes sense
+	// ans := make([]int, sums[len(sums)-1])
+	parFor(blocks, func(curBlock int) {
+		shift := 0
+		if curBlock > 0 {
+			shift = sums[curBlock-1]
+		}
+		lastWritten := shift
+		for k := l + curBlock*parBlockSize; k < min(l+(curBlock+1)*parBlockSize, r); k++ {
+			if flags[k] == 1 {
+				if (k < lastWritten) {
+					panic("Aaaa, reusing flags turned out wrong")
 				}
+				flags[lastWritten] = a[k]
+				lastWritten += 1
 			}
-			wg2.Done()
-		}(i)
-	}
-	wg2.Wait()
+		}
+	})
 
-	return ans
+	return flags
 }
 
 func parCopy(to []int, from []int, startPos int, l, r int) {
@@ -187,7 +172,7 @@ func parCopy(to []int, from []int, startPos int, l, r int) {
 func parQSort(a []int, l, _r int) {
 	r := _r + 1
 	if r-l < parBlockSize {
-		QsortSeq(a, l, r-1) // inplace
+		QsortSeq(a, l, r-1)
 		return
 	}
 
@@ -212,16 +197,15 @@ func parQSort(a []int, l, _r int) {
 	parQSort(right, 0, len(right)-1)
 	wg.Wait()
 
-	var wg2 sync.WaitGroup
-	wg2.Add(2)
+	wg.Add(2)
 	go func() {
 		parCopy(a, left, 0, 0, len(left))
-		wg2.Done()
+		wg.Done()
 	}()
 	go func() {
 		parCopy(a, middle, len(left), 0, len(middle))
-		wg2.Done()
+		wg.Done()
 	}()
 	parCopy(a, right, len(left)+len(middle), 0, len(right))
-	wg2.Wait()
+	wg.Wait()
 }

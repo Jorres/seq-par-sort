@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const arraySize = 5 * 1e7
+const arraySize = 1 * 1e7
 const stopForkingSize = 2000
 const startBubbleSortSize = 20
 
