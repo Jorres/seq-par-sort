@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const arraySize = 1e7
+const arraySize = 3 * 1e7
 const stopForkingSize = 2000
 const startBubbleSortSize = 20
 
@@ -81,7 +81,7 @@ func qsortPar(arr []int, low, high int) {
 func generateRandomArray(size int) []int {
 	array := make([]int, size)
 	for i := range array {
-		array[i] = rand.Intn(1000) // TODO I don't want to debug overflow, maybe later
+		array[i] = rand.Intn(1e6) // TODO I don't want to debug overflow, maybe later
 	}
 	return array
 }
@@ -96,7 +96,7 @@ func isSortedAsc(arr []int) bool {
 }
 
 func doTest(sortingFunc func([]int, int, int), testName string) {
-	const nTests = 1
+	const nTests = 5
 	var totalTime time.Duration
 
 	fmt.Printf("%v with %v elements, averaged over %v launches\n\n", testName, arraySize, nTests)
@@ -135,7 +135,7 @@ func doTest(sortingFunc func([]int, int, int), testName string) {
 }
 
 func main() {
-	// doTest(qsortPar, "Quicksort parallel just fork")
-	// doTest(parQSort, "Quicksort parallel filter/flags")
+	doTest(qsortPar, "Quicksort parallel just fork")
+	doTest(parQSort, "Quicksort parallel filter/flags")
 	doTest(QsortSeq, "Quicksort sequential")
 }

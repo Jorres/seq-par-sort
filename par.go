@@ -96,7 +96,8 @@ func parMap(a, b []int, l, r int, f func(int) int) {
 
 func parFilter(a []int, l, r int, f func(int) bool) []int {
 	if r-l < parBlockSize {
-		ans := make([]int, parBlockSize / 2)
+		// ans := make([]int, 0, parBlockSize)
+		var ans []int
 		for i := l; i < r; i++ {
 			if f(a[i]) {
 				ans = append(ans, a[i])
@@ -125,8 +126,8 @@ func parFilter(a []int, l, r int, f func(int) bool) []int {
 	})
 
 	sums = parScan(sums, 0, len(sums), sum, 0)
-
 	ans := make([]int, sums[len(sums)-1])
+
 	parFor(blocks, func(curBlock int) {
 		shift := 0
 		if curBlock > 0 {
