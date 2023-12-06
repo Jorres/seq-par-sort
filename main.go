@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const arraySize = 1 * 1e7
+const arraySize = 1e7
 const stopForkingSize = 2000
 const startBubbleSortSize = 20
 
@@ -136,6 +136,6 @@ func doTest(sortingFunc func([]int, int, int), testName string) {
 
 func main() {
 	// doTest(qsortPar, "Quicksort parallel just fork")
-	doTest(parQSort, "Quicksort parallel filter/flags")
-	// doTest(qsortSeq, "Quicksort sequential")
+	// doTest(parQSort, "Quicksort parallel filter/flags")
+	doTest(QsortSeq, "Quicksort sequential")
 }

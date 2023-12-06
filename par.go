@@ -126,9 +126,7 @@ func parFilter(a []int, l, r int, f func(int) bool) []int {
 
 	sums = parScan(sums, 0, len(sums), sum, 0)
 
-	// I used to do this for a separate answer,
-	// but reusing flags allocation makes sense
-	// ans := make([]int, sums[len(sums)-1])
+	ans := make([]int, sums[len(sums)-1])
 	parFor(blocks, func(curBlock int) {
 		shift := 0
 		if curBlock > 0 {
@@ -137,16 +135,13 @@ func parFilter(a []int, l, r int, f func(int) bool) []int {
 		lastWritten := shift
 		for k := l + curBlock*parBlockSize; k < min(l+(curBlock+1)*parBlockSize, r); k++ {
 			if flags[k] == 1 {
-				if (k < lastWritten) {
-					panic("Aaaa, reusing flags turned out wrong")
-				}
 				flags[lastWritten] = a[k]
 				lastWritten += 1
 			}
 		}
 	})
 
-	return flags
+	return ans
 }
 
 func parCopy(to []int, from []int, startPos int, l, r int) {
