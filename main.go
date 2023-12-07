@@ -81,7 +81,7 @@ func qsortPar(arr []int, low, high int) {
 func generateRandomArray(size int) []int {
 	array := make([]int, size)
 	for i := range array {
-		array[i] = rand.Intn(1e6) // TODO I don't want to debug overflow, maybe later
+		array[i] = rand.Intn(size)
 	}
 	return array
 }

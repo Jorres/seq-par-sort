@@ -62,3 +62,47 @@ Average time: 10.61618686s
 ```
 
 Выигрыш: 10.61618686 / 3.520430222 = 3.01559360378.
+
+## Update after deadline
+
+По обсуждению в чате я понял, что нужно было еще и написать версию с filter\scan. Что ж, лучше поздно, чем никогда, поэтому выкладываю еще и ее.
+
+Запуск:
+
+```
+GOMAXPROCS=4 go run main.go par.go
+```
+
+Результаты: (на 3 * 1e7 потому что у меня не хватило памяти на 1e8 :)
+
+Видно, что нормально версию со сканами сделать не получилось :( 
+
+```
+Quicksort parallel just fork with 3e+07 elements, averaged over 5 launches
+
+Launch 1: 1.100979769s
+Launch 2: 1.075080866s
+Launch 3: 1.069924883s
+Launch 4: 1.070284812s
+Launch 5: 1.032754069s
+
+Average time: 1.069804879s
+Quicksort parallel filter/flags with 3e+07 elements, averaged over 5 launches
+
+Launch 1: 8.327654204s
+Launch 2: 7.901150208s
+Launch 3: 7.86835264s
+Launch 4: 8.773543146s
+Launch 5: 9.273885242s
+
+Average time: 8.428917088s
+Quicksort sequential with 3e+07 elements, averaged over 5 launches
+
+Launch 1: 2.920410994s
+Launch 2: 2.894015561s
+Launch 3: 2.817156518s
+Launch 4: 2.784574081s
+Launch 5: 2.951704728s
+
+Average time: 2.873572376s
+```

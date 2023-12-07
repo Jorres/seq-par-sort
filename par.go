@@ -56,7 +56,7 @@ func parScan(a []int, l, r int, f func(int, int) int, startVal int) []int {
 		sums[curBlock] = curBlockVal
 	})
 
-	sums = parScan(sums, 0, len(sums), sum, 0) // span X/blockSize
+	sums = parScan(sums, 0, len(sums), sum, 0)
 	ans := make([]int, r-l)
 
 	parFor(blocks, func(curBlock int) {
@@ -96,7 +96,6 @@ func parMap(a, b []int, l, r int, f func(int) int) {
 
 func parFilter(a []int, l, r int, f func(int) bool) []int {
 	if r-l < parBlockSize {
-		// ans := make([]int, 0, parBlockSize)
 		var ans []int
 		for i := l; i < r; i++ {
 			if f(a[i]) {
@@ -136,7 +135,7 @@ func parFilter(a []int, l, r int, f func(int) bool) []int {
 		lastWritten := shift
 		for k := l + curBlock*parBlockSize; k < min(l+(curBlock+1)*parBlockSize, r); k++ {
 			if flags[k] == 1 {
-				flags[lastWritten] = a[k]
+				ans[lastWritten] = a[k]
 				lastWritten += 1
 			}
 		}
